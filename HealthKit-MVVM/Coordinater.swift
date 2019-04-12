@@ -26,9 +26,12 @@ final class Coordinator: CoordinatorProtocol {
             let heartRateListViewModel = HeartRateListViewModel(healthKitService: dependencies.healthKitService,
                                                                 coordinator: self)
             let heartRateListViewController = HeartRateListViewController(heartRateViewModel: heartRateListViewModel)
+            heartRateListViewModel.delegate = heartRateListViewController
             navigationController.pushViewController(heartRateListViewController, animated: true)
-        case .presentAddHeartRate:
-            navigationController.presentingViewController
+        case .presentAddHeartRateVC:
+            let addHeartRateViewModel = AddHeartRateViewModel(coordinator: self, healthKitService: dependencies.healthKitService)
+            let addHeartRateViewController = AddHeartRateViewController(viewModel: addHeartRateViewModel)
+            navigationController.present(addHeartRateViewController, animated: true, completion: nil)
         case .dismiss:
             navigationController.presentingViewController?.dismiss(animated: true, completion: nil)
         }
@@ -37,7 +40,7 @@ final class Coordinator: CoordinatorProtocol {
 
 enum CoordinatorAction {
     case showList
-    case presentAddHeartRate
+    case presentAddHeartRateVC
     case dismiss
 }
 

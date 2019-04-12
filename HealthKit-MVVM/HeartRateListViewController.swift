@@ -32,17 +32,10 @@ class HeartRateListViewController: UIViewController {
         let heartRateCell = UINib(nibName: HeartRateTableViewCell.nibName, bundle: nil)
         tableView.register(heartRateCell, forCellReuseIdentifier: HeartRateTableViewCell.identifier)
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(presentAddHeartRateVC))
-        heartRateListViewModel.fetchHeartRates { [unowned self] (success) in
-            if success {
-                DispatchQueue.main.async {
-                    self.tableView.reloadData()                    
-                }
-            }
-        }
     }
     
     @objc func presentAddHeartRateVC() {
-        heartRateListViewModel.coordinator.handle(.presentAddHeartRate)
+        heartRateListViewModel.coordinator.handle(.presentAddHeartRateVC)
     }
 }
 
@@ -58,5 +51,14 @@ extension HeartRateListViewController: UITableViewDataSource {
         cell.configure(with: heartRateCellViewModel)
 
         return cell
+    }
+}
+
+extension HeartRateListViewController: HeartHeartRateListViewModelDelegate {
+    
+    func heartRatesWereUpdated() {
+        DispatchQueue.main.async { [unowned self] in
+           self.tableView.reloadData()
+        }
     }
 }

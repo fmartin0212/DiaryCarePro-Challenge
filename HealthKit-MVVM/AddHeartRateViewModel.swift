@@ -18,7 +18,7 @@ struct AddHeartRateViewModel {
         self.healthKitService = healthKitService
     }
     
-    func addHeartRateWith(value: String, startDate: Date, endDate: Date) {
+    func saveHeartRate(withValue: String, startDate: Date, endDate: Date) {
         
     }
 }

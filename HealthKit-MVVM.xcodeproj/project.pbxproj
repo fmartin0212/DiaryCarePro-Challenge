@@ -15,7 +15,6 @@
 		B7F9E085225FAC2B00D7799C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B7F9E084225FAC2B00D7799C /* Assets.xcassets */; };
 		B7F9E088225FAC2B00D7799C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B7F9E086225FAC2B00D7799C /* LaunchScreen.storyboard */; };
 		B7F9E092225FAD2500D7799C /* HeartRateListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F9E091225FAD2500D7799C /* HeartRateListViewModel.swift */; };
-		B7F9E095225FADA700D7799C /* HeartRate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F9E094225FADA700D7799C /* HeartRate.swift */; };
 		B7F9E099225FAFE800D7799C /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7F9E098225FAFE800D7799C /* HealthKit.framework */; };
 		B7F9E09D225FD97800D7799C /* Coordinater.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F9E09C225FD97800D7799C /* Coordinater.swift */; };
 		B7F9E09F225FDB6000D7799C /* HealthKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F9E09E225FDB6000D7799C /* HealthKitService.swift */; };
@@ -37,7 +36,6 @@
 		B7F9E087225FAC2B00D7799C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		B7F9E089225FAC2B00D7799C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B7F9E091225FAD2500D7799C /* HeartRateListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateListViewModel.swift; sourceTree = "<group>"; };
-		B7F9E094225FADA700D7799C /* HeartRate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRate.swift; sourceTree = "<group>"; };
 		B7F9E096225FAFE800D7799C /* HealthKit-MVVM.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "HealthKit-MVVM.entitlements"; sourceTree = "<group>"; };
 		B7F9E098225FAFE800D7799C /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
 		B7F9E09C225FD97800D7799C /* Coordinater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinater.swift; sourceTree = "<group>"; };
@@ -85,7 +83,6 @@
 				B7336E7022610B5B00143812 /* AddHeartRateViewController.xib */,
 				B7336E732261113000143812 /* AddHeartRateViewModel.swift */,
 				B7F9E096225FAFE800D7799C /* HealthKit-MVVM.entitlements */,
-				B7F9E094225FADA700D7799C /* HeartRate.swift */,
 				B7F9E0A2225FEEFC00D7799C /* HeartRateListViewController.swift */,
 				B7F9E0A8226021FC00D7799C /* HeartRateTableViewCell.swift */,
 				B7F9E0A9226021FC00D7799C /* HeartRateTableViewCell.xib */,
@@ -206,7 +203,6 @@
 				B7F9E0A7225FF8CA00D7799C /* HeartRateCellViewModel.swift in Sources */,
 				B7F9E09F225FDB6000D7799C /* HealthKitService.swift in Sources */,
 				B7336E742261113000143812 /* AddHeartRateViewModel.swift in Sources */,
-				B7F9E095225FADA700D7799C /* HeartRate.swift in Sources */,
 				B7F9E07E225FAC2900D7799C /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

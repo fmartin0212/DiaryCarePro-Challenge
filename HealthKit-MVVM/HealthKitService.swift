@@ -50,23 +50,33 @@ class HealthKitService: HealthKitServiceProtocol {
                 }
                 
                 self.delegate?.updateSamples(newSamples: newSamples, deletedSamples: nil)
-              
+                
                 self.anchor = anchor
                 
-                query.updateHandler = { (query, newSamples, deletedSamples, anchor, error) in
-                    if let error = error {
-                        print("There was an error executing the anchored query: \(error.localizedDescription)")
-                        return
-                    }
-                    
-                    self.delegate?.updateSamples(newSamples: newSamples, deletedSamples: nil)
-                    
-                    self.anchor = anchor
-                }
+                //                query.updateHandler = { (query, newSamples, deletedSamples, anchor, error) in
+                //                    if let error = error {
+                //                        print("There was an error executing the anchored query: \(error.localizedDescription)")
+                //                        return
+                //                    }
+                //
+                //                    self.delegate?.updateSamples(newSamples: newSamples, deletedSamples: nil)
+                //
+                //                    self.anchor = anchor
+                //                }
             })
             self.healthStore.execute(anchoredQuery)
         }
         healthStore.execute(observerQuery)
+    }
+    
+    func saveHeartRate(withValue value: Double, startDate: Date, endDate: Date, completion: @escaping (Bool) -> Void) {
+        let heartRate = HKQuantityType.quantityType(forIdentifier: .heartRate)!
+        let sample = HKQuantitySample(type: heartRate, quantity: HKQuantity(unit: HKUnit.count().unitDivided(by: .minute()), doubleValue: value ), start: startDate, end: endDate, device: HKDevice.local(), metadata: nil)
+        
+        if healthStore.authorizationStatus(for: heartRate) == .sharingAuthorized {
+            healthStore.save(sample, withCompletion: { (success, error) in
+            })
+        }
     }
     
     func fetchHeartRates(completion: @escaping ([HKQuantitySample]?) -> Void) {
@@ -93,8 +103,7 @@ protocol HealthKitServiceProtocol {
     var delegate: HealthKitServiceProtocolDelegate? { get set }
     func requestAuthorization(completion: @escaping (Bool) -> Void)
     func addObserver()
-    
-//    func addHeartRate(completion: @escaping (Bool) -> Void)
+    func saveHeartRate(withValue value: Double, startDate: Date, endDate: Date, completion: @escaping (Bool) -> Void)
     func fetchHeartRates(completion: @escaping ([HKQuantitySample]?) -> Void)
 }
 
