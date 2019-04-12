@@ -42,7 +42,6 @@ class AddHeartRateViewController: UIViewController {
         startDatePicker.maximumDate = Date()
         endDateTextField.inputView = endDatePicker
         endDatePicker.maximumDate = startDatePicker.date
-        
     }
     
     @IBAction func cancelButtonTapped(_ sender: Any) {
@@ -50,7 +49,15 @@ class AddHeartRateViewController: UIViewController {
     }
     
     @IBAction func saveButtonTapped(_ sender: Any) {
-        
+        guard let value = bpmTextField.text, !value.isEmpty else { return }
+        viewModel.saveHeartRate(withValue: value, startDate: startDatePicker.date, endDate: endDatePicker.date) { [unowned self] (success) in
+            DispatchQueue.main.async {
+                if success {
+                    self.viewModel.coordinator.handle(.dismiss(vc: self))
+                } else {
+                    // Handle error; e.g. alert controller
+                }
+            }
+        }
     }
-    
 }

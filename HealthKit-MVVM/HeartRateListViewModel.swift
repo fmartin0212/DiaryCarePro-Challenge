@@ -42,15 +42,20 @@ class HeartRateListViewModel {
 
 extension HeartRateListViewModel: HealthKitServiceProtocolDelegate {
     
-    func updateSamples(newSamples: [HKSample]?, deletedSamples: [HKDeletedObject]?) {
+    func updateSamples(newSamples: [HKSample]?, deletedSamples: [HKDeletedObject]?, isIncremental: Bool) {
         if let newSamples = newSamples {
-            print(newSamples)
-            self.heartRateCellViewModels = newSamples.map { HeartRateCellViewModel(heartRate: $0 as! HKQuantitySample) }
-            
-            if let deletedSamples = deletedSamples {
-                print("deleted sample")
+            if isIncremental {
+                newSamples.forEach { self.heartRateCellViewModels.append(HeartRateCellViewModel(heartRate: $0 as! HKQuantitySample)) }
+            } else {
+                self.heartRateCellViewModels = newSamples.map { HeartRateCellViewModel(heartRate: $0 as! HKQuantitySample) }
             }
-            delegate?.heartRatesWereUpdated()
         }
+        
+        if let deletedSamples = deletedSamples as? [HKQuantitySample] {
+//            for deletedSample as! HKQuanti in deletedSamples {
+//                guard let index =
+//            }
+        }
+        delegate?.heartRatesWereUpdated()
     }
 }

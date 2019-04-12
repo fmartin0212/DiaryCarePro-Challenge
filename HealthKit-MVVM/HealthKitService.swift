@@ -48,9 +48,8 @@ class HealthKitService: HealthKitServiceProtocol {
                     print("There was an error executing the anchored query: \(error.localizedDescription)")
                     return
                 }
-                
-                self.delegate?.updateSamples(newSamples: newSamples, deletedSamples: nil)
-                
+                let isIncremental: Bool = self.anchor == nil ? false : true
+                self.delegate?.updateSamples(newSamples: newSamples, deletedSamples: nil, isIncremental: isIncremental)
                 self.anchor = anchor
                 
                 //                query.updateHandler = { (query, newSamples, deletedSamples, anchor, error) in
@@ -75,6 +74,12 @@ class HealthKitService: HealthKitServiceProtocol {
         
         if healthStore.authorizationStatus(for: heartRate) == .sharingAuthorized {
             healthStore.save(sample, withCompletion: { (success, error) in
+                if let error = error {
+                    print("There was an error saving the heart rate: \(error.localizedDescription)")
+                    completion(false)
+                    return
+                }
+                completion(true)
             })
         }
     }
@@ -108,5 +113,5 @@ protocol HealthKitServiceProtocol {
 }
 
 protocol HealthKitServiceProtocolDelegate {
-    func updateSamples(newSamples: [HKSample]?, deletedSamples: [HKDeletedObject]?)
+    func updateSamples(newSamples: [HKSample]?, deletedSamples: [HKDeletedObject]?, isIncremental: Bool)
 }

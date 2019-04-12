@@ -18,7 +18,10 @@ struct AddHeartRateViewModel {
         self.healthKitService = healthKitService
     }
     
-    func saveHeartRate(withValue: String, startDate: Date, endDate: Date) {
-        
+    func saveHeartRate(withValue value: String, startDate: Date, endDate: Date, completion: @escaping (Bool) -> Void) {
+        guard let value = Double(value) else { return }
+        healthKitService.saveHeartRate(withValue: value, startDate: startDate, endDate: endDate) { (success) in
+             completion(success)
+        }
     }
 }
