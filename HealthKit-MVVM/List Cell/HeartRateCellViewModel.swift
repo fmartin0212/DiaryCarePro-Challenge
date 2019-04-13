@@ -9,19 +9,18 @@
 import Foundation
 import HealthKit
 
-struct HeartRateCellViewModel {
+struct HeartRateCellViewModel: Equatable {
     
     // MARK: - Properties
     
     let heartRate: HKQuantitySample
     var heartRateValue: String {
-        return "\(heartRate.quantity) bpms"
+        let rawValue = heartRate.quantity.doubleValue(for: HKUnit.count().unitDivided(by: .minute())).rounded(.down)
+        
+        return "\(rawValue) bpm"
     }
     var startDate: String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = .short
-        dateFormatter.timeStyle = .short
-        return dateFormatter.string(from: heartRate.startDate)
+      return heartRate.startDate.asFormattedString()
     }
     
     // MARK: - Initialization
@@ -30,3 +29,4 @@ struct HeartRateCellViewModel {
         self.heartRate = heartRate
     }
 }
+

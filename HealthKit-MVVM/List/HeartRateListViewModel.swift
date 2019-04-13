@@ -21,20 +21,30 @@ class HeartRateListViewModel {
     var healthKitService: HealthKitServiceProtocol
     let coordinator: CoordinatorProtocol
     var delegate: HeartHeartRateListViewModelDelegate?
+    let type = HKObjectType.quantityType(forIdentifier: .heartRate)!
     
     // MARK: - Initialization
     
     init(healthKitService: HealthKitServiceProtocol, coordinator: CoordinatorProtocol) {
         self.healthKitService = healthKitService
         self.coordinator = coordinator
+        if healthKitService.healthStore.authorizationStatus(for: self.type) == .sharingAuthorized {
+            self.healthKitService.addObserver()
+        }
         self.healthKitService.delegate = self
-        self.healthKitService.addObserver()
     }
     
-    func fetchHeartRates(completion: @escaping (Bool) -> Void) {
-        healthKitService.fetchHeartRates {  [unowned self] (heartRates) in
-            guard let heartRates = heartRates else { completion(false) ; return }
-            self.heartRateCellViewModels = heartRates.map { HeartRateCellViewModel(heartRate: $0) }
+    func checkAuthorization(completion: @escaping (Bool) -> Void) {
+        healthKitService.checkAuthorizationStatus(for: self.type) { (success) in
+            completion(success)
+        }
+    }
+    
+    func delete(_ cellViewModel: HeartRateCellViewModel, completion: @escaping (Bool) -> Void) {
+        let object = cellViewModel.heartRate as HKObject
+        healthKitService.delete(object: object) { [unowned self] (success) in
+            guard let index = self.heartRateCellViewModels.firstIndex(of: cellViewModel) else { return }
+            self.heartRateCellViewModels.remove(at: index)
             completion(true)
         }
     }
@@ -42,7 +52,7 @@ class HeartRateListViewModel {
 
 extension HeartRateListViewModel: HealthKitServiceProtocolDelegate {
     
-    func updateSamples(newSamples: [HKSample]?, deletedSamples: [HKDeletedObject]?, isIncremental: Bool) {
+    func updateSamples(newSamples: [HKSample]?, isIncremental: Bool) {
         if let newSamples = newSamples {
             if isIncremental {
                 newSamples.forEach { self.heartRateCellViewModels.append(HeartRateCellViewModel(heartRate: $0 as! HKQuantitySample)) }
@@ -51,11 +61,6 @@ extension HeartRateListViewModel: HealthKitServiceProtocolDelegate {
             }
         }
         
-        if let deletedSamples = deletedSamples as? [HKQuantitySample] {
-//            for deletedSample as! HKQuanti in deletedSamples {
-//                guard let index =
-//            }
-        }
         delegate?.heartRatesWereUpdated()
     }
 }

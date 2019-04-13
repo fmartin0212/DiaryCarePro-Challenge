@@ -12,6 +12,7 @@ struct AddHeartRateViewModel {
     
     let coordinator: CoordinatorProtocol
     let healthKitService: HealthKitServiceProtocol
+    var initialDate = Date().asFormattedString()
     
     init(coordinator: CoordinatorProtocol, healthKitService: HealthKitServiceProtocol) {
         self.coordinator = coordinator

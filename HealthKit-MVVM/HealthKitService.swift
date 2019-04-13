@@ -9,24 +9,62 @@
 import Foundation
 import HealthKit
 
+protocol HealthKitServiceProtocol {
+    var healthStore: HKHealthStore { get set }
+    var delegate: HealthKitServiceProtocolDelegate? { get set }
+    func checkAuthorizationStatus(for type: HKObjectType, completion: @escaping (Bool) -> Void)
+    func requestAuthorization(for type: HKObjectType, completion: @escaping (Bool) -> Void)
+    func addObserver()
+    func saveHeartRate(withValue value: Double, startDate: Date, endDate: Date, completion: @escaping (Bool) -> Void)
+    func delete(object: HKObject, completion: @escaping (Bool) -> Void)
+}
+
+protocol HealthKitServiceProtocolDelegate {
+    func updateSamples(newSamples: [HKSample]?, isIncremental: Bool)
+}
+
 protocol HealthKitServiceDelegate: HealthKitServiceProtocolDelegate {}
 
 class HealthKitService: HealthKitServiceProtocol {
-    
+   
     // MARK: - Properties
     
     var healthStore: HKHealthStore = HKHealthStore()
     var delegate: HealthKitServiceProtocolDelegate?
     var anchor: HKQueryAnchor?
     
-    func requestAuthorization(completion: @escaping (Bool) -> Void) {
+    func checkAuthorizationStatus(for type: HKObjectType, completion: @escaping (Bool) -> Void) {
         if HKHealthStore.isHealthDataAvailable() {
-            let type = HKObjectType.quantityType(forIdentifier: .heartRate)!
-            healthStore.requestAuthorization(toShare: [type], read: [type]) { (success, error) in
+            switch healthStore.authorizationStatus(for: type) {
+            case .notDetermined:
+                    requestAuthorization(for: type, completion: { [unowned self] (success) in
+                        if success {
+                            completion(true)
+                             self.addObserver()
+                        } else {
+                            // Handle error
+                            completion(false)
+                        }
+                    })
+            case .sharingAuthorized:
+                completion(true)
+            case .sharingDenied:
+                completion(false)
+            @unknown default:
+                completion(false)
+            }
+        }
+    }
+    
+    func requestAuthorization(for type: HKObjectType, completion: @escaping (Bool) -> Void) {
+        if HKHealthStore.isHealthDataAvailable() {
+            let heartRate = HKObjectType.quantityType(forIdentifier: .heartRate)!
+            healthStore.requestAuthorization(toShare: [heartRate], read: [heartRate]) { (success, error) in
                 if let error = error {
                     print("Error obtaining Health Kit permissions: \(error.localizedDescription)")
                     completion(false)
                 } else {
+                   
                     completion(success)
                 }
             }
@@ -34,6 +72,7 @@ class HealthKitService: HealthKitServiceProtocol {
             completion(false)
         }
     }
+
     
     func addObserver() {
         let heartRate = HKObjectType.quantityType(forIdentifier: .heartRate)!
@@ -49,19 +88,8 @@ class HealthKitService: HealthKitServiceProtocol {
                     return
                 }
                 let isIncremental: Bool = self.anchor == nil ? false : true
-                self.delegate?.updateSamples(newSamples: newSamples, deletedSamples: nil, isIncremental: isIncremental)
+                self.delegate?.updateSamples(newSamples: newSamples, isIncremental: isIncremental)
                 self.anchor = anchor
-                
-                //                query.updateHandler = { (query, newSamples, deletedSamples, anchor, error) in
-                //                    if let error = error {
-                //                        print("There was an error executing the anchored query: \(error.localizedDescription)")
-                //                        return
-                //                    }
-                //
-                //                    self.delegate?.updateSamples(newSamples: newSamples, deletedSamples: nil)
-                //
-                //                    self.anchor = anchor
-                //                }
             })
             self.healthStore.execute(anchoredQuery)
         }
@@ -84,34 +112,16 @@ class HealthKitService: HealthKitServiceProtocol {
         }
     }
     
-    func fetchHeartRates(completion: @escaping ([HKQuantitySample]?) -> Void) {
-        let heartRate = HKObjectType.quantityType(forIdentifier: .heartRate)!
-        if healthStore.authorizationStatus(for: heartRate) == .sharingAuthorized {
-            
-            let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)
-            let query = HKSampleQuery(sampleType: heartRate, predicate: nil, limit: 0, sortDescriptors: [sortDescriptor]) { (_, heartRates, error) in
-                if let error = error {
-                    print("There was an error fetching the heart rate samples: \(error.localizedDescription)")
-                    completion(nil)
-                    return
-                }
-                guard let heartRates = heartRates as? [HKQuantitySample] else { completion(nil) ; return }
-                completion(heartRates)
+    func delete(object: HKObject, completion: @escaping (Bool) -> Void) {
+        healthStore.delete(object) { (success, error) in
+            if let error = error {
+                print("There was an error deleting an HKObject: \(error.localizedDescription)")
+                completion(false)
+                return
             }
-            healthStore.execute(query)
+            if success {
+                completion(true)
+            }
         }
     }
-}
-
-protocol HealthKitServiceProtocol {
-    var healthStore: HKHealthStore { get set }
-    var delegate: HealthKitServiceProtocolDelegate? { get set }
-    func requestAuthorization(completion: @escaping (Bool) -> Void)
-    func addObserver()
-    func saveHeartRate(withValue value: Double, startDate: Date, endDate: Date, completion: @escaping (Bool) -> Void)
-    func fetchHeartRates(completion: @escaping ([HKQuantitySample]?) -> Void)
-}
-
-protocol HealthKitServiceProtocolDelegate {
-    func updateSamples(newSamples: [HKSample]?, deletedSamples: [HKDeletedObject]?, isIncremental: Bool)
 }

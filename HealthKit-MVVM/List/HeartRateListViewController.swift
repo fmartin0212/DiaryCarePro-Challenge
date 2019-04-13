@@ -29,6 +29,11 @@ class HeartRateListViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        heartRateListViewModel.checkAuthorization { (success) in
+            if success {
+                self.heartRatesWereUpdated()
+            }
+        }
         let heartRateCell = UINib(nibName: HeartRateTableViewCell.nibName, bundle: nil)
         tableView.register(heartRateCell, forCellReuseIdentifier: HeartRateTableViewCell.identifier)
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(presentAddHeartRateVC))
@@ -47,10 +52,24 @@ extension HeartRateListViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: HeartRateTableViewCell.identifier, for: indexPath) as? HeartRateTableViewCell else { return UITableViewCell() }
+        cell.selectionStyle = .none
         let heartRateCellViewModel = heartRateListViewModel.heartRateCellViewModels[indexPath.row]
         cell.configure(with: heartRateCellViewModel)
 
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            let cellViewModel = heartRateListViewModel.heartRateCellViewModels[indexPath.row]
+            heartRateListViewModel.delete(cellViewModel) { [unowned self] (success) in
+                if success {
+                    DispatchQueue.main.async {
+                        self.tableView.deleteRows(at: [indexPath], with: .automatic)
+                    }
+                }
+            }
+        }
     }
 }
 

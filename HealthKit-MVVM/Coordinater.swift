@@ -16,7 +16,7 @@ final class Coordinator: CoordinatorProtocol {
     init(with dependencies: Dependencies, and action: CoordinatorAction) {
         self.dependencies = dependencies
         self.navigationController = UINavigationController()
-//        self.navigationController.definesPresentationContext = true
+        self.navigationController.definesPresentationContext = true
         handle(action)
     }
     
@@ -26,13 +26,14 @@ final class Coordinator: CoordinatorProtocol {
             let heartRateListViewModel = HeartRateListViewModel(healthKitService: dependencies.healthKitService,
                                                                 coordinator: self)
             let heartRateListViewController = HeartRateListViewController(heartRateViewModel: heartRateListViewModel)
+            heartRateListViewController.loadViewIfNeeded()
             heartRateListViewModel.delegate = heartRateListViewController
             navigationController.pushViewController(heartRateListViewController, animated: true)
         case .presentAddHeartRateVC:
-            let addHeartRateViewModel = AddHeartRateViewModel(coordinator: self, healthKitService: dependencies.healthKitService)
+            let addHeartRateViewModel = AddHeartRateViewModel(coordinator: self,
+                                                              healthKitService: dependencies.healthKitService)
             let addHeartRateViewController = AddHeartRateViewController(viewModel: addHeartRateViewModel)
             navigationController.present(addHeartRateViewController, animated: true, completion: nil)
-
         case .dismiss(let vc):
             vc.dismiss(animated: true, completion: nil)
         }

@@ -15,29 +15,14 @@ struct Dependencies {
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
-    let healthKitService = HealthKitService()
     
     let window = UIWindow(frame: UIScreen.main.bounds)
     let coordinator = Coordinator(with: Dependencies(), and: .showList)
     
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
         window.rootViewController = coordinator.navigationController
         window.makeKeyAndVisible()
-        
-//        let sample = HKQuantitySample(type: HKQuantityType.quantityType(forIdentifier: .heartRate)!, quantity: HKQuantity(unit: HKUnit.count().unitDivided(by: .minute()), doubleValue: 65.3), start: Date(), end: Date(timeInterval: 60, since: Date()), device: HKDevice.local(), metadata: nil)
-//        healthKitService.requestAuthorization { (success) in
-//            if success {
-//                self.healthKitService.healthStore.save(sample, withCompletion: { (success, error) in
-//                    self.healthKitService.fetchHeartRates(completion: { (heartRates) in
-//                    })
-//                })
-//            }
-//        }
-
-//        print(sample)
 
         return true
     }

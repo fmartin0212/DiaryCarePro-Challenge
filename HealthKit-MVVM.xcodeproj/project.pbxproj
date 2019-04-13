@@ -10,6 +10,7 @@
 		B7336E7122610B5B00143812 /* AddHeartRateViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7336E6F22610B5B00143812 /* AddHeartRateViewController.swift */; };
 		B7336E7222610B5B00143812 /* AddHeartRateViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = B7336E7022610B5B00143812 /* AddHeartRateViewController.xib */; };
 		B7336E742261113000143812 /* AddHeartRateViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7336E732261113000143812 /* AddHeartRateViewModel.swift */; };
+		B7336E7B2261694C00143812 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7336E7A2261694C00143812 /* Extensions.swift */; };
 		B7F9E07E225FAC2900D7799C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F9E07D225FAC2900D7799C /* AppDelegate.swift */; };
 		B7F9E083225FAC2900D7799C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B7F9E081225FAC2900D7799C /* Main.storyboard */; };
 		B7F9E085225FAC2B00D7799C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B7F9E084225FAC2B00D7799C /* Assets.xcassets */; };
@@ -29,6 +30,7 @@
 		B7336E6F22610B5B00143812 /* AddHeartRateViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddHeartRateViewController.swift; sourceTree = "<group>"; };
 		B7336E7022610B5B00143812 /* AddHeartRateViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = AddHeartRateViewController.xib; sourceTree = "<group>"; };
 		B7336E732261113000143812 /* AddHeartRateViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddHeartRateViewModel.swift; sourceTree = "<group>"; };
+		B7336E7A2261694C00143812 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		B7F9E07A225FAC2900D7799C /* HealthKit-MVVM.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "HealthKit-MVVM.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B7F9E07D225FAC2900D7799C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B7F9E082225FAC2900D7799C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -59,6 +61,36 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B7336E75226147B600143812 /* Add */ = {
+			isa = PBXGroup;
+			children = (
+				B7336E732261113000143812 /* AddHeartRateViewModel.swift */,
+				B7336E6F22610B5B00143812 /* AddHeartRateViewController.swift */,
+				B7336E7022610B5B00143812 /* AddHeartRateViewController.xib */,
+			);
+			path = Add;
+			sourceTree = "<group>";
+		};
+		B7336E76226147CA00143812 /* List */ = {
+			isa = PBXGroup;
+			children = (
+				B7F9E091225FAD2500D7799C /* HeartRateListViewModel.swift */,
+				B7F9E0A2225FEEFC00D7799C /* HeartRateListViewController.swift */,
+				B7F9E0A3225FEEFC00D7799C /* HeartRateListViewController.xib */,
+			);
+			path = List;
+			sourceTree = "<group>";
+		};
+		B7336E77226147E000143812 /* List Cell */ = {
+			isa = PBXGroup;
+			children = (
+				B7F9E0A6225FF8CA00D7799C /* HeartRateCellViewModel.swift */,
+				B7F9E0A8226021FC00D7799C /* HeartRateTableViewCell.swift */,
+				B7F9E0A9226021FC00D7799C /* HeartRateTableViewCell.xib */,
+			);
+			path = "List Cell";
+			sourceTree = "<group>";
+		};
 		B7F9E071225FAC2900D7799C = {
 			isa = PBXGroup;
 			children = (
@@ -79,18 +111,13 @@
 		B7F9E07C225FAC2900D7799C /* HealthKit-MVVM */ = {
 			isa = PBXGroup;
 			children = (
-				B7336E6F22610B5B00143812 /* AddHeartRateViewController.swift */,
-				B7336E7022610B5B00143812 /* AddHeartRateViewController.xib */,
-				B7336E732261113000143812 /* AddHeartRateViewModel.swift */,
-				B7F9E096225FAFE800D7799C /* HealthKit-MVVM.entitlements */,
-				B7F9E0A2225FEEFC00D7799C /* HeartRateListViewController.swift */,
-				B7F9E0A8226021FC00D7799C /* HeartRateTableViewCell.swift */,
-				B7F9E0A9226021FC00D7799C /* HeartRateTableViewCell.xib */,
-				B7F9E0A3225FEEFC00D7799C /* HeartRateListViewController.xib */,
-				B7F9E091225FAD2500D7799C /* HeartRateListViewModel.swift */,
-				B7F9E0A6225FF8CA00D7799C /* HeartRateCellViewModel.swift */,
+				B7336E76226147CA00143812 /* List */,
+				B7336E77226147E000143812 /* List Cell */,
+				B7336E75226147B600143812 /* Add */,
 				B7F9E09C225FD97800D7799C /* Coordinater.swift */,
 				B7F9E09E225FDB6000D7799C /* HealthKitService.swift */,
+				B7336E7A2261694C00143812 /* Extensions.swift */,
+				B7F9E096225FAFE800D7799C /* HealthKit-MVVM.entitlements */,
 				B7F9E093225FAD3800D7799C /* Resources */,
 			);
 			path = "HealthKit-MVVM";
@@ -200,6 +227,7 @@
 				B7F9E09D225FD97800D7799C /* Coordinater.swift in Sources */,
 				B7F9E0AA226021FC00D7799C /* HeartRateTableViewCell.swift in Sources */,
 				B7F9E092225FAD2500D7799C /* HeartRateListViewModel.swift in Sources */,
+				B7336E7B2261694C00143812 /* Extensions.swift in Sources */,
 				B7F9E0A7225FF8CA00D7799C /* HeartRateCellViewModel.swift in Sources */,
 				B7F9E09F225FDB6000D7799C /* HealthKitService.swift in Sources */,
 				B7336E742261113000143812 /* AddHeartRateViewModel.swift in Sources */,
