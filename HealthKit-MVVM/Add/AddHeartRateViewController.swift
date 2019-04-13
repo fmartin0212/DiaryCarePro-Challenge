@@ -17,14 +17,14 @@ class AddHeartRateViewController: UIViewController {
     @IBOutlet weak var startDateTextField: UITextField!
     @IBOutlet weak var endDateTextField: UITextField!
     static let nibName = "AddHeartRateViewController"
-    let viewModel: AddHeartRateViewModel
+    let addHeartRateViewModel: AddHeartRateViewModel
     let startDatePicker = UIDatePicker()
     let endDatePicker = UIDatePicker()
     
     // MARK: - Initialization
     
-    init(viewModel: AddHeartRateViewModel) {
-        self.viewModel = viewModel
+    init(addHeartRateViewModel: AddHeartRateViewModel) {
+        self.addHeartRateViewModel = addHeartRateViewModel
         super.init(nibName: AddHeartRateViewController.nibName, bundle: nil)
     }
     
@@ -46,11 +46,11 @@ class AddHeartRateViewController: UIViewController {
     func setupViews() {
         startDateTextField.inputView = startDatePicker
         startDatePicker.maximumDate = Date()
-        startDateTextField.text = viewModel.initialDate
+        startDateTextField.text = addHeartRateViewModel.initialDate
         startDatePicker.tag = 1
         endDateTextField.inputView = endDatePicker
         endDatePicker.maximumDate = startDatePicker.date
-        endDateTextField.text = viewModel.initialDate
+        endDateTextField.text = addHeartRateViewModel.initialDate
         endDatePicker.tag = 2
         startDatePicker.addTarget(self, action: #selector(datePickerChanged(sender:)), for: .valueChanged)
         endDatePicker.addTarget(self, action: #selector(datePickerChanged(sender:)), for: .valueChanged)
@@ -67,9 +67,9 @@ class AddHeartRateViewController: UIViewController {
     }
     
     func addKeyboardObservers() {
-        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { [unowned self] (notification) in
+        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { [weak self] (notification) in
             let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as! CGRect
-            self.scrollView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardFrame.height, right: 0)
+            self?.scrollView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardFrame.height, right: 0)
         }
         
         NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { [weak self] (_) in
@@ -84,10 +84,10 @@ class AddHeartRateViewController: UIViewController {
     
     @IBAction func saveButtonTapped(_ sender: Any) {
         guard let value = bpmTextField.text, !value.isEmpty else { return }
-        viewModel.saveHeartRate(withValue: value, startDate: startDatePicker.date, endDate: endDatePicker.date) { [unowned self] (success) in
+        addHeartRateViewModel.saveHeartRate(withValue: value, startDate: startDatePicker.date, endDate: endDatePicker.date) { [unowned self] (success) in
             DispatchQueue.main.async {
                 if success {
-                    self.viewModel.coordinator.handle(.dismiss(vc: self))
+                    self.addHeartRateViewModel.coordinator.handle(.dismiss(vc: self))
                 } else {
                     // Handle error; e.g. alert controller
                 }

@@ -10,9 +10,11 @@ import Foundation
 
 struct AddHeartRateViewModel {
     
+    // MARK: - Properties
+    
     let coordinator: CoordinatorProtocol
     let healthKitService: HealthKitServiceProtocol
-    var initialDate = Date().asFormattedString()
+    let initialDate = Date().asFormattedString()
     
     init(coordinator: CoordinatorProtocol, healthKitService: HealthKitServiceProtocol) {
         self.coordinator = coordinator
@@ -20,7 +22,8 @@ struct AddHeartRateViewModel {
     }
     
     func saveHeartRate(withValue value: String, startDate: Date, endDate: Date, completion: @escaping (Bool) -> Void) {
-        guard let value = Double(value) else { return }
+        // Would add additional error coverage here to prevent invalid heart rates from being entered
+        guard let value = Double(value), value > 50 && value < 200 else { return }
         healthKitService.saveHeartRate(withValue: value, startDate: startDate, endDate: endDate) { (success) in
              completion(success)
         }

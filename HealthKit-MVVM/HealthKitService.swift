@@ -73,7 +73,6 @@ class HealthKitService: HealthKitServiceProtocol {
         }
     }
 
-    
     func addObserver() {
         let heartRate = HKObjectType.quantityType(forIdentifier: .heartRate)!
         

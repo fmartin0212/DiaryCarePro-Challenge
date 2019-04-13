@@ -60,7 +60,6 @@ extension HeartRateListViewModel: HealthKitServiceProtocolDelegate {
                 self.heartRateCellViewModels = newSamples.map { HeartRateCellViewModel(heartRate: $0 as! HKQuantitySample) }
             }
         }
-        
         delegate?.heartRatesWereUpdated()
     }
 }

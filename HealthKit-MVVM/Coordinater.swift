@@ -10,6 +10,9 @@ import Foundation
 import UIKit
 
 final class Coordinator: CoordinatorProtocol {
+    
+    // MARK: - Properties
+    
     let dependencies: Dependencies
     let navigationController: UINavigationController
     
@@ -32,7 +35,7 @@ final class Coordinator: CoordinatorProtocol {
         case .presentAddHeartRateVC:
             let addHeartRateViewModel = AddHeartRateViewModel(coordinator: self,
                                                               healthKitService: dependencies.healthKitService)
-            let addHeartRateViewController = AddHeartRateViewController(viewModel: addHeartRateViewModel)
+            let addHeartRateViewController = AddHeartRateViewController(addHeartRateViewModel: addHeartRateViewModel)
             navigationController.present(addHeartRateViewController, animated: true, completion: nil)
         case .dismiss(let vc):
             vc.dismiss(animated: true, completion: nil)
