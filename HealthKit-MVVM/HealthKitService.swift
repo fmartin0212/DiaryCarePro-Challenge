@@ -33,16 +33,16 @@ class HealthKitService: HealthKitServiceProtocol {
     var delegate: HealthKitServiceProtocolDelegate?
     var anchor: HKQueryAnchor?
     
+    // Would add additional error handling here
     func checkAuthorizationStatus(for type: HKObjectType, completion: @escaping (Bool) -> Void) {
         if HKHealthStore.isHealthDataAvailable() {
             switch healthStore.authorizationStatus(for: type) {
             case .notDetermined:
-                    requestAuthorization(for: type, completion: { [unowned self] (success) in
+                    requestAuthorization(for: type, completion: { [weak self] (success) in
                         if success {
                             completion(true)
-                             self.addObserver()
+                             self?.addObserver()
                         } else {
-                            // Handle error
                             completion(false)
                         }
                     })
@@ -76,21 +76,21 @@ class HealthKitService: HealthKitServiceProtocol {
     func addObserver() {
         let heartRate = HKObjectType.quantityType(forIdentifier: .heartRate)!
         
-        let observerQuery = HKObserverQuery(sampleType: heartRate, predicate: nil) { (query, _, error) in
+        let observerQuery = HKObserverQuery(sampleType: heartRate, predicate: nil) { [weak self] (query, _, error) in
             if let error = error {
                 print("There was an error retrieving the heart rate samples: \(error.localizedDescription)")
             }
-            let anchoredQuery = HKAnchoredObjectQuery(type: heartRate, predicate: nil, anchor: self.anchor, limit: 0, resultsHandler: { (query, newSamples, deletedSamples, anchor, error) in
+            let anchoredQuery = HKAnchoredObjectQuery(type: heartRate, predicate: nil, anchor: self?.anchor, limit: 0, resultsHandler: { (query, newSamples, deletedSamples, anchor, error) in
                 
                 if let error = error {
                     print("There was an error executing the anchored query: \(error.localizedDescription)")
                     return
                 }
-                let isIncremental: Bool = self.anchor == nil ? false : true
-                self.delegate?.updateSamples(newSamples: newSamples, isIncremental: isIncremental)
-                self.anchor = anchor
+                let isIncremental: Bool = self?.anchor == nil ? false : true
+                self?.delegate?.updateSamples(newSamples: newSamples, isIncremental: isIncremental)
+                self?.anchor = anchor
             })
-            self.healthStore.execute(anchoredQuery)
+            self?.healthStore.execute(anchoredQuery)
         }
         healthStore.execute(observerQuery)
     }

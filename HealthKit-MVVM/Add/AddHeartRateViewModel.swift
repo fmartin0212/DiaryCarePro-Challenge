@@ -23,7 +23,7 @@ struct AddHeartRateViewModel {
     
     func saveHeartRate(withValue value: String, startDate: Date, endDate: Date, completion: @escaping (Bool) -> Void) {
         // Would add additional error coverage here to prevent invalid heart rates from being entered
-        guard let value = Double(value), value > 50 && value < 200 else { return }
+        guard let value = Double(value), value > Constant.fifty && value < Constant.twoHundred else { return }
         healthKitService.saveHeartRate(withValue: value, startDate: startDate, endDate: endDate) { (success) in
              completion(success)
         }

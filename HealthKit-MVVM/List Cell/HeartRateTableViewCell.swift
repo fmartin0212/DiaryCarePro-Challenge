@@ -8,12 +8,12 @@
 
 import UIKit
 
-class HeartRateTableViewCell: UITableViewCell {
+final class HeartRateTableViewCell: UITableViewCell {
 
     // MARK: - Properties
     
-    @IBOutlet weak var dateLabel: UILabel!
-    @IBOutlet weak var heartRateLabel: UILabel!
+    @IBOutlet private weak var dateLabel: UILabel!
+    @IBOutlet private weak var heartRateLabel: UILabel!
     static let identifier = "heartRateCell"
     static let nibName = "HeartRateTableViewCell"
     

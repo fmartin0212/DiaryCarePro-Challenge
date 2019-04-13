@@ -8,13 +8,13 @@
 
 import UIKit
 
-class HeartRateListViewController: UIViewController {
+final class HeartRateListViewController: UIViewController {
     
     // MARK: - Properties
     
-    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet private weak var tableView: UITableView!
     static private let nibName = "HeartRateListViewController"
-    let heartRateListViewModel: HeartRateListViewModel
+    private let heartRateListViewModel: HeartRateListViewModel
     
     // MARK: - Initialization
     
@@ -31,15 +31,14 @@ class HeartRateListViewController: UIViewController {
         super.viewDidLoad()
         heartRateListViewModel.checkAuthorization { (success) in
             if success {
-                self.heartRatesWereUpdated()
             }
         }
         let heartRateCell = UINib(nibName: HeartRateTableViewCell.nibName, bundle: nil)
         tableView.register(heartRateCell, forCellReuseIdentifier: HeartRateTableViewCell.identifier)
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(presentAddHeartRateVC))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(presentAddHeartRateVC))
     }
     
-    @objc func presentAddHeartRateVC() {
+    @objc private func presentAddHeartRateVC() {
         heartRateListViewModel.coordinator.handle(.presentAddHeartRateVC)
     }
 }
@@ -62,10 +61,10 @@ extension HeartRateListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             let cellViewModel = heartRateListViewModel.heartRateCellViewModels[indexPath.row]
-            heartRateListViewModel.delete(cellViewModel) { [unowned self] (success) in
+            heartRateListViewModel.delete(cellViewModel) { (success) in
                 if success {
-                    DispatchQueue.main.async {
-                        self.tableView.deleteRows(at: [indexPath], with: .automatic)
+                    DispatchQueue.main.async { [tableView] in
+                        tableView.deleteRows(at: [indexPath], with: .automatic)
                     }
                 }
             }
@@ -76,8 +75,8 @@ extension HeartRateListViewController: UITableViewDataSource {
 extension HeartRateListViewController: HeartHeartRateListViewModelDelegate {
     
     func heartRatesWereUpdated() {
-        DispatchQueue.main.async { [unowned self] in
-           self.tableView.reloadData()
+        DispatchQueue.main.async { [tableView] in
+           tableView?.reloadData()
         }
     }
 }

@@ -9,10 +9,6 @@
 import UIKit
 import HealthKit
 
-struct Dependencies {
-    let healthKitService = HealthKitService()
-}
-
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
     

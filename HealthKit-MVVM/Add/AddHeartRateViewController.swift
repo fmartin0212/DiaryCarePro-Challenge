@@ -8,18 +8,18 @@
 
 import UIKit
 
-class AddHeartRateViewController: UIViewController {
+final class AddHeartRateViewController: UIViewController {
 
     // MARK: - Properties
     
-    @IBOutlet weak var scrollView: UIScrollView!
-    @IBOutlet weak var bpmTextField: UITextField!
-    @IBOutlet weak var startDateTextField: UITextField!
-    @IBOutlet weak var endDateTextField: UITextField!
-    static let nibName = "AddHeartRateViewController"
-    let addHeartRateViewModel: AddHeartRateViewModel
-    let startDatePicker = UIDatePicker()
-    let endDatePicker = UIDatePicker()
+    @IBOutlet private weak var scrollView: UIScrollView!
+    @IBOutlet private weak var bpmTextField: UITextField!
+    @IBOutlet private weak var startDateTextField: UITextField!
+    @IBOutlet private weak var endDateTextField: UITextField!
+    static private let nibName = "AddHeartRateViewController"
+    private let addHeartRateViewModel: AddHeartRateViewModel
+    private let startDatePicker = UIDatePicker()
+    private let endDatePicker = UIDatePicker()
     
     // MARK: - Initialization
     
@@ -43,46 +43,44 @@ class AddHeartRateViewController: UIViewController {
         NotificationCenter.default.removeObserver(self)
     }
     
-    func setupViews() {
+    private func setupViews() {
         startDateTextField.inputView = startDatePicker
         startDatePicker.maximumDate = Date()
         startDateTextField.text = addHeartRateViewModel.initialDate
-        startDatePicker.tag = 1
         endDateTextField.inputView = endDatePicker
         endDatePicker.maximumDate = startDatePicker.date
         endDateTextField.text = addHeartRateViewModel.initialDate
-        endDatePicker.tag = 2
         startDatePicker.addTarget(self, action: #selector(datePickerChanged(sender:)), for: .valueChanged)
         endDatePicker.addTarget(self, action: #selector(datePickerChanged(sender:)), for: .valueChanged)
     }
     
-    @objc func datePickerChanged(sender: UIDatePicker) {
-        switch sender.tag {
-        case 1:
+    @objc private func datePickerChanged(sender: UIDatePicker) {
+        switch sender {
+        case startDatePicker:
             startDateTextField.text = sender.date.asFormattedString()
-        case 2: endDateTextField.text = sender.date.asFormattedString()
+        case endDatePicker: endDateTextField.text = sender.date.asFormattedString()
         default:
             print("Something went wrong")
         }
     }
     
-    func addKeyboardObservers() {
-        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { [weak self] (notification) in
-            let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as! CGRect
-            self?.scrollView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardFrame.height, right: 0)
+    private func addKeyboardObservers() {
+        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { [scrollView] (notification) in
+            guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+            scrollView?.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardFrame.height, right: 0)
         }
         
-        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { [weak self] (_) in
-            self?.scrollView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { [scrollView] (_) in
+            scrollView?.contentInset = UIEdgeInsets.zero
         }
         
     }
     
-    @IBAction func cancelButtonTapped(_ sender: Any) {
+    @IBAction private func cancelButtonTapped(_ sender: Any) {
         dismiss(animated: true, completion: nil)
     }
     
-    @IBAction func saveButtonTapped(_ sender: Any) {
+    @IBAction private func saveButtonTapped(_ sender: Any) {
         guard let value = bpmTextField.text, !value.isEmpty else { return }
         addHeartRateViewModel.saveHeartRate(withValue: value, startDate: startDatePicker.date, endDate: endDatePicker.date) { [unowned self] (success) in
             DispatchQueue.main.async {

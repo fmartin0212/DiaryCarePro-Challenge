@@ -21,30 +21,30 @@ class HeartRateListViewModel {
     var healthKitService: HealthKitServiceProtocol
     let coordinator: CoordinatorProtocol
     var delegate: HeartHeartRateListViewModelDelegate?
-    let type = HKObjectType.quantityType(forIdentifier: .heartRate)!
+    private let type = HKObjectType.quantityType(forIdentifier: .heartRate)!
     
     // MARK: - Initialization
     
     init(healthKitService: HealthKitServiceProtocol, coordinator: CoordinatorProtocol) {
         self.healthKitService = healthKitService
         self.coordinator = coordinator
-        if healthKitService.healthStore.authorizationStatus(for: self.type) == .sharingAuthorized {
+        if healthKitService.healthStore.authorizationStatus(for: type) == .sharingAuthorized {
             self.healthKitService.addObserver()
         }
         self.healthKitService.delegate = self
     }
     
     func checkAuthorization(completion: @escaping (Bool) -> Void) {
-        healthKitService.checkAuthorizationStatus(for: self.type) { (success) in
+        healthKitService.checkAuthorizationStatus(for: type) { (success) in
             completion(success)
         }
     }
     
     func delete(_ cellViewModel: HeartRateCellViewModel, completion: @escaping (Bool) -> Void) {
         let object = cellViewModel.heartRate as HKObject
-        healthKitService.delete(object: object) { [unowned self] (success) in
-            guard let index = self.heartRateCellViewModels.firstIndex(of: cellViewModel) else { return }
-            self.heartRateCellViewModels.remove(at: index)
+        healthKitService.delete(object: object) { [weak self] (success) in
+            guard let index = self?.heartRateCellViewModels.firstIndex(of: cellViewModel) else { return }
+            self?.heartRateCellViewModels.remove(at: index)
             completion(true)
         }
     }
@@ -55,11 +55,18 @@ extension HeartRateListViewModel: HealthKitServiceProtocolDelegate {
     func updateSamples(newSamples: [HKSample]?, isIncremental: Bool) {
         if let newSamples = newSamples {
             if isIncremental {
-                newSamples.forEach { self.heartRateCellViewModels.append(HeartRateCellViewModel(heartRate: $0 as! HKQuantitySample)) }
+                newSamples.forEach {
+                    guard let quantitySample = $0 as? HKQuantitySample else { return }
+                    let heartRateCellViewModel = HeartRateCellViewModel(heartRate: quantitySample)
+                    heartRateCellViewModels.append(heartRateCellViewModel)
+                }
             } else {
-                self.heartRateCellViewModels = newSamples.map { HeartRateCellViewModel(heartRate: $0 as! HKQuantitySample) }
+                self.heartRateCellViewModels = newSamples.compactMap {
+                    guard let quantitySample = $0 as? HKQuantitySample else { return nil }
+                    return HeartRateCellViewModel(heartRate: quantitySample)
+                }
             }
+            delegate?.heartRatesWereUpdated()
         }
-        delegate?.heartRatesWereUpdated()
     }
 }

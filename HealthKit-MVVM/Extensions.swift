@@ -11,9 +11,12 @@ import Foundation
 extension Date {
     
     func asFormattedString() -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = .short
-        dateFormatter.timeStyle = .short
-        return dateFormatter.string(from: self)
+        DateFormatter.shared.dateStyle = .short
+        DateFormatter.shared.timeStyle = .short
+        return DateFormatter.shared.string(from: self)
     }
+}
+
+extension DateFormatter {
+    static let shared = DateFormatter()
 }
