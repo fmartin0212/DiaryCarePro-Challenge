@@ -12,11 +12,12 @@ import HealthKit
 protocol HealthKitServiceProtocol {
     var healthStore: HKHealthStore { get set }
     var delegate: HealthKitServiceProtocolDelegate? { get set }
-    func checkAuthorizationStatus(for type: HKObjectType, completion: @escaping (Bool) -> Void)
-    func requestAuthorization(for type: HKObjectType, completion: @escaping (Bool) -> Void)
+    var type: HKQuantityType { get set }
+    func checkAuthorizationStatus(for type: HKObjectType, completion: @escaping (Result<Bool, HealthKitError>) -> Void)
+    func requestAuthorization(for type: HKObjectType, completion: @escaping (Result<Bool, HealthKitError>) -> Void)
     func addObserver()
-    func saveHeartRate(withValue value: Double, startDate: Date, endDate: Date, completion: @escaping (Bool) -> Void)
-    func delete(object: HKObject, completion: @escaping (Bool) -> Void)
+    func saveHeartRate(withValue value: Double, startDate: Date, endDate: Date, completion: @escaping (Result<Bool, HealthKitError>) -> Void)
+    func delete(object: HKObject, completion: @escaping (Result<Bool, HealthKitError>) -> Void)
 }
 
 protocol HealthKitServiceProtocolDelegate {
@@ -25,6 +26,15 @@ protocol HealthKitServiceProtocolDelegate {
 
 protocol HealthKitServiceDelegate: HealthKitServiceProtocolDelegate {}
 
+enum HealthKitError: String, Error  {
+    case healthDataNotAvailable = "Sorry, health data is not available on this device."
+    case sharingDenied = "You have denied authorization to share data with Apple Health. Please authorize in order to use this feature."
+    case genericFailure = "There was an error while trying to process your request. Please try again."
+    case saving = "There was an error saving to Apple Health. Please try again."
+    case deleting = "There was an error deleting from Apple Health. Please try again."
+    case invalidEntry = "Please enter a valid heart rate that is no less than 50 and no greater than 200 bpm."
+}
+
 class HealthKitService: HealthKitServiceProtocol {
    
     // MARK: - Properties
@@ -32,47 +42,50 @@ class HealthKitService: HealthKitServiceProtocol {
     var healthStore: HKHealthStore = HKHealthStore()
     var delegate: HealthKitServiceProtocolDelegate?
     var anchor: HKQueryAnchor?
+    var type: HKQuantityType = HKObjectType.quantityType(forIdentifier: .heartRate)!
     
-    // Would add additional error handling here
-    func checkAuthorizationStatus(for type: HKObjectType, completion: @escaping (Bool) -> Void) {
-        if HKHealthStore.isHealthDataAvailable() {
-            switch healthStore.authorizationStatus(for: type) {
-            case .notDetermined:
-                    requestAuthorization(for: type, completion: { [weak self] (success) in
-                        if success {
-                            completion(true)
-                             self?.addObserver()
-                        } else {
-                            completion(false)
-                        }
-                    })
-            case .sharingAuthorized:
-                completion(true)
-            case .sharingDenied:
-                completion(false)
-            @unknown default:
-                completion(false)
-            }
+    func checkAuthorizationStatus(for type: HKObjectType, completion: @escaping (Result<Bool, HealthKitError>) -> Void) {
+        if !HKHealthStore.isHealthDataAvailable() {
+            completion(.failure(.healthDataNotAvailable))
+            return
         }
-    }
-    
-    func requestAuthorization(for type: HKObjectType, completion: @escaping (Bool) -> Void) {
-        if HKHealthStore.isHealthDataAvailable() {
-            let heartRate = HKObjectType.quantityType(forIdentifier: .heartRate)!
-            healthStore.requestAuthorization(toShare: [heartRate], read: [heartRate]) { (success, error) in
-                if let error = error {
-                    print("Error obtaining Health Kit permissions: \(error.localizedDescription)")
-                    completion(false)
-                } else {
-                   
-                    completion(success)
+        
+        switch healthStore.authorizationStatus(for: type) {
+        case .notDetermined:
+            requestAuthorization(for: type, completion: { [weak self] (result) in
+                switch result {
+                case .failure(let error):
+                    completion(.failure(error))
+                case .success(let success):
+                    self?.addObserver()
+                    completion(.success(success))
                 }
-            }
-        } else {
-            completion(false)
+            })
+        case .sharingAuthorized:
+            completion(.success(true))
+        case .sharingDenied:
+            completion(.failure(.sharingDenied))
+        @unknown default:
+            completion(.failure(.genericFailure))
         }
     }
-
+    
+    func requestAuthorization(for type: HKObjectType, completion: @escaping (Result<Bool, HealthKitError>) -> Void) {
+        if !HKHealthStore.isHealthDataAvailable() {
+            completion(.failure(.healthDataNotAvailable))
+            return
+        }
+        let heartRate = HKObjectType.quantityType(forIdentifier: .heartRate)!
+        healthStore.requestAuthorization(toShare: [heartRate], read: [heartRate]) { (success, error) in
+            if let error = error {
+                print("Error obtaining Health Kit permissions: \(error.localizedDescription)")
+                completion(.failure(.genericFailure))
+            } else {
+                completion(.success(true))
+            }
+        }
+    }
+    
     func addObserver() {
         let heartRate = HKObjectType.quantityType(forIdentifier: .heartRate)!
         
@@ -95,31 +108,60 @@ class HealthKitService: HealthKitServiceProtocol {
         healthStore.execute(observerQuery)
     }
     
-    func saveHeartRate(withValue value: Double, startDate: Date, endDate: Date, completion: @escaping (Bool) -> Void) {
-        let heartRate = HKQuantityType.quantityType(forIdentifier: .heartRate)!
-        let sample = HKQuantitySample(type: heartRate, quantity: HKQuantity(unit: HKUnit.count().unitDivided(by: .minute()), doubleValue: value ), start: startDate, end: endDate, device: HKDevice.local(), metadata: nil)
-        
-        if healthStore.authorizationStatus(for: heartRate) == .sharingAuthorized {
-            healthStore.save(sample, withCompletion: { (success, error) in
-                if let error = error {
-                    print("There was an error saving the heart rate: \(error.localizedDescription)")
-                    completion(false)
-                    return
+    func saveHeartRate(withValue value: Double, startDate: Date, endDate: Date, completion: @escaping (Result<Bool, HealthKitError>) -> Void) {
+        if !HKHealthStore.isHealthDataAvailable() {
+            completion(.failure(.healthDataNotAvailable))
+            return
+        }
+   
+        checkAuthorizationStatus(for: type) { [weak self] (result) in
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success(_):
+                let heartRate = HKQuantityType.quantityType(forIdentifier: .heartRate)!
+                let sample = HKQuantitySample(type: heartRate, quantity: HKQuantity(unit: HKUnit.count().unitDivided(by: .minute()), doubleValue: value ), start: startDate, end: endDate, device: HKDevice.local(), metadata: nil)
+                
+                if self?.healthStore.authorizationStatus(for: heartRate) == .sharingAuthorized {
+                    self?.healthStore.save(sample, withCompletion: { (success, error) in
+                        if let error = error {
+                            print("There was an error saving the heart rate: \(error.localizedDescription)")
+                            completion(.failure(.genericFailure))
+                            return
+                        }
+                        if success {
+                            completion(.success(true))
+                        } else {
+                            completion(.failure(.saving))
+                        }
+                    })
                 }
-                completion(true)
-            })
+            }
         }
     }
     
-    func delete(object: HKObject, completion: @escaping (Bool) -> Void) {
-        healthStore.delete(object) { (success, error) in
-            if let error = error {
-                print("There was an error deleting an HKObject: \(error.localizedDescription)")
-                completion(false)
-                return
-            }
-            if success {
-                completion(true)
+    func delete(object: HKObject, completion: @escaping (Result<Bool, HealthKitError>) -> Void) {
+        if !HKHealthStore.isHealthDataAvailable() {
+            completion(.failure(.healthDataNotAvailable))
+            return
+        }
+        checkAuthorizationStatus(for: type) { [weak self] (result) in
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success(_):
+                self?.healthStore.delete(object) { (success, error) in
+                    if let error = error {
+                        print("There was an error deleting an HKObject: \(error.localizedDescription)")
+                        completion(.failure(.genericFailure))
+                        return
+                    }
+                    if success {
+                        completion(.success(true))
+                    } else {
+                        completion(.failure(.saving))
+                    }
+                }
             }
         }
     }

@@ -29,8 +29,14 @@ final class HeartRateListViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        heartRateListViewModel.checkAuthorization { (success) in
-            if success {
+        heartRateListViewModel.checkAuthorization { (result) in
+            switch result {
+            case .failure(let error):
+                DispatchQueue.main.async { [weak self] in
+                    self?.heartRateListViewModel.coordinator.handle(.presentAlertController(error: error, vc: self ?? UIViewController()))
+                }
+            case .success(_):
+                print("Success obtaining authorization")
             }
         }
         let heartRateCell = UINib(nibName: HeartRateTableViewCell.nibName, bundle: nil)
@@ -61,8 +67,11 @@ extension HeartRateListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             let cellViewModel = heartRateListViewModel.heartRateCellViewModels[indexPath.row]
-            heartRateListViewModel.delete(cellViewModel) { (success) in
-                if success {
+            heartRateListViewModel.delete(cellViewModel, viewController: self) { [weak self] (result) in
+                switch result {
+                case .failure(let error):
+                    self?.heartRateListViewModel.coordinator.handle(.presentAlertController(error: error, vc: self ?? UIViewController()))
+                case .success(_):
                     DispatchQueue.main.async { [tableView] in
                         tableView.deleteRows(at: [indexPath], with: .automatic)
                     }

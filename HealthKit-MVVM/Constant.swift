@@ -9,6 +9,8 @@
 import Foundation
 
 struct Constant {
-    static let fifty = 50
-    static let twoHundred = 200
+    static let fifty: Double = 50
+    static let twoHundred: Double = 200
+    static let oops = "Oops"
+    static let ok = "OK"
 }

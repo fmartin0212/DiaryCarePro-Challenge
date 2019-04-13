@@ -82,12 +82,13 @@ final class AddHeartRateViewController: UIViewController {
     
     @IBAction private func saveButtonTapped(_ sender: Any) {
         guard let value = bpmTextField.text, !value.isEmpty else { return }
-        addHeartRateViewModel.saveHeartRate(withValue: value, startDate: startDatePicker.date, endDate: endDatePicker.date) { [unowned self] (success) in
+        addHeartRateViewModel.saveHeartRate(withValue: value, startDate: startDatePicker.date, endDate: endDatePicker.date, viewController: self) { [weak self] (result) in
             DispatchQueue.main.async {
-                if success {
-                    self.addHeartRateViewModel.coordinator.handle(.dismiss(vc: self))
-                } else {
-                    // Handle error; e.g. alert controller
+                switch result {
+                case .failure(let error):
+                    self?.addHeartRateViewModel.coordinator.handle(.presentAlertController(error: error, vc: self ?? UIViewController()))
+                case .success(_):
+                    self?.addHeartRateViewModel.coordinator.handle(.dismiss(vc: self ?? UIViewController()))
                 }
             }
         }

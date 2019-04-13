@@ -21,11 +21,16 @@ struct AddHeartRateViewModel {
         self.healthKitService = healthKitService
     }
     
-    func saveHeartRate(withValue value: String, startDate: Date, endDate: Date, completion: @escaping (Bool) -> Void) {
-        // Would add additional error coverage here to prevent invalid heart rates from being entered
-        guard let value = Double(value), value > Constant.fifty && value < Constant.twoHundred else { return }
-        healthKitService.saveHeartRate(withValue: value, startDate: startDate, endDate: endDate) { (success) in
-             completion(success)
+    func saveHeartRate(withValue value: String, startDate: Date, endDate: Date, viewController: AddHeartRateViewController, completion: @escaping (Result<Bool, HealthKitError>) -> Void) {
+        guard let value = Double(value), value >= Constant.fifty && value <= Constant.twoHundred
+            else { coordinator.handle(.presentAlertController(error: .invalidEntry, vc: viewController)) ; return }
+        healthKitService.saveHeartRate(withValue: value, startDate: startDate, endDate: endDate) { (result) in
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success(_):
+                completion(.success(true))
+            }
         }
     }
 }

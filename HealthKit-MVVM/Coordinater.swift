@@ -39,6 +39,11 @@ final class Coordinator: CoordinatorProtocol {
             navigationController.present(addHeartRateViewController, animated: true, completion: nil)
         case .dismiss(let vc):
             vc.dismiss(animated: true, completion: nil)
+        case .presentAlertController(error: let error, vc: let vc):
+            let alertController = UIAlertController(title: Constant.oops, message: error.rawValue, preferredStyle: .alert)
+            let okAction = UIAlertAction(title: Constant.ok, style: .default, handler: nil)
+            alertController.addAction(okAction)
+            vc.present(alertController, animated: true, completion: nil)
         }
     }
 }
@@ -46,6 +51,7 @@ final class Coordinator: CoordinatorProtocol {
 enum CoordinatorAction {
     case showList
     case presentAddHeartRateVC
+    case presentAlertController(error: HealthKitError, vc: UIViewController)
     case dismiss(vc: UIViewController)
 }
 

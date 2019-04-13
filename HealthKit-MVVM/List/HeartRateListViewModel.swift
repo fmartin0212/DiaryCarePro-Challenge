@@ -34,18 +34,29 @@ class HeartRateListViewModel {
         self.healthKitService.delegate = self
     }
     
-    func checkAuthorization(completion: @escaping (Bool) -> Void) {
-        healthKitService.checkAuthorizationStatus(for: type) { (success) in
-            completion(success)
+    func checkAuthorization(completion: @escaping (Result<Bool, HealthKitError>) -> Void) {
+        healthKitService.checkAuthorizationStatus(for: type) { (result) in
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success(_):
+                completion(.success(true))
+            }
         }
     }
     
-    func delete(_ cellViewModel: HeartRateCellViewModel, completion: @escaping (Bool) -> Void) {
+    func delete(_ cellViewModel: HeartRateCellViewModel, viewController: HeartRateListViewController, completion: @escaping (Result<Bool, HealthKitError>) -> Void) {
         let object = cellViewModel.heartRate as HKObject
-        healthKitService.delete(object: object) { [weak self] (success) in
-            guard let index = self?.heartRateCellViewModels.firstIndex(of: cellViewModel) else { return }
-            self?.heartRateCellViewModels.remove(at: index)
-            completion(true)
+        healthKitService.delete(object: object) { [weak self] (result) in
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success(_):
+                guard let index = self?.heartRateCellViewModels.firstIndex(of: cellViewModel) else { return }
+                self?.heartRateCellViewModels.remove(at: index)
+                completion(.success(true))
+            }
+            
         }
     }
 }
